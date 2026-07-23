@@ -1,30 +1,50 @@
+import axios from "axios";
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({
-      error: "Méthode non autorisée"
-    });
+    return res.status(405).json({ error: "Méthode non autorisée" });
   }
 
   try {
-    const body = req.body || {};
-    const message = body.message;
+    const { message } = req.body;
 
-    if (!message || typeof message !== "string") {
-      return res.status(400).json({
-        error: "Aucun message reçu."
-      });
+    if (!message) {
+      return res.status(400).json({ error: "Message vide" });
     }
 
+    const response = await axios.post(
+      "https://openrouter.ai/api/v1/chat/completions",
+      {
+        model: "openai/gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: "Tu es ♤☯MADARA☯♧ IA. Réponds toujours en français."
+          },
+          {
+            role: "user",
+            content: message
+          }
+        ]
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
     return res.status(200).json({
-      reply: `♤☯MADARA☯♧ IA : J'ai reçu ton message : "${message}"`
+      reply: response.data.choices[0].message.content
     });
 
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error(error.response?.data || error.message);
 
     return res.status(500).json({
-      error: "Erreur interne du serveur",
-      details: err.message
+      error: "Erreur serveur",
+      details: error.response?.data || error.message
     });
   }
 }
