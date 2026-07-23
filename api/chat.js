@@ -1,49 +1,25 @@
-const axios = require("axios");
-
-module.exports = async (req, res) => {
-
-  if (req.method !== "POST") {
-    return res.status(405).json({
-      error: "Méthode non autorisée"
-    });
+export default async function handler(req, res) {
+  // S'assurer qu'on accepte uniquement les requêtes POST (ou adapter selon ton app)
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Méthode non autorisée' });
   }
 
   try {
-
     const { message } = req.body;
 
-    const response = await axios.post(
-      "https://openrouter.ai/api/v1/chat/completions",
-      {
-        model: "openai/gpt-4o-mini",
-        messages: [
-          {
-            role: "system",
-            content: "Tu es MADARA IA, une intelligence artificielle qui répond en français."
-          },
-          {
-            role: "user",
-            content: message
-          }
-        ]
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-          "Content-Type": "application/json"
-        }
-      }
-    );
+    // Vérifie si une clé API ou un traitement est manquant
+    // (C'est souvent ici que ça plante si process.env.TA_CLE_API est vide)
 
-    res.json({
-      reply: response.data.choices[0].message.content
+    // Exemple de réponse de test pour valider que l'API répond
+    return res.status(200).json({ 
+      reply: `Réponse de ton IA pour : "${message || 'Rien reçu'}"` 
     });
 
   } catch (error) {
-
-    res.status(500).json({
-      error: "Erreur serveur"
+    console.error('Erreur attrapée dans l\'API :', error);
+    return res.status(500).json({ 
+      error: 'Erreur interne du serveur', 
+      details: error.message 
     });
-
   }
-};
+}
