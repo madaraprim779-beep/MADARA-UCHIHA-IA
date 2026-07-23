@@ -1,22 +1,28 @@
 export default async function handler(req, res) {
-  // S'assurer qu'on accepte uniquement les requêtes POST (ou adapter selon ton app)
+  // Autoriser uniquement les requêtes POST
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Méthode non autorisée' });
+    return res.status(405).json({ error: 'Méthode non autorisée. Utilisez POST.' });
   }
 
   try {
     const { message } = req.body;
 
-    // Vérifie si une clé API ou un traitement est manquant
-    // (C'est souvent ici que ça plante si process.env.TA_CLE_API est vide)
+    if (!message) {
+      return res.status(400).json({ error: 'Le message est vide.' });
+    }
 
-    // Exemple de réponse de test pour valider que l'API répond
-    return res.status(200).json({ 
-      reply: `Réponse de ton IA pour : "${message || 'Rien reçu'}"` 
-    });
+    // --- LOGIQUE DE TON IA ---
+    // Si tu appelles une API externe (comme Google Gemini, OpenAI, etc.), 
+    // assure-toi que ta clé est bien dans les variables d'environnement de Vercel.
+    // Exemple : const apiKey = process.env.TA_CLE_API;
+
+    // Réponse temporaire de test pour valider que le serveur ne plante plus
+    const aiResponse = `Réponse de ♤☯MADARA☯♧ IA : J'ai bien reçu ton message -> "${message}"`;
+
+    return res.status(200).json({ reply: aiResponse });
 
   } catch (error) {
-    console.error('Erreur attrapée dans l\'API :', error);
+    console.error('Erreur critique dans api/chat.js :', error);
     return res.status(500).json({ 
       error: 'Erreur interne du serveur', 
       details: error.message 
